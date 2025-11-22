@@ -26,8 +26,8 @@
     "zustand": "^5.0.8"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
+    "start": "cross-env NODE_OPTIONS=--no-webstorage craco start",
+    "build": "cross-env NODE_OPTIONS=--no-webstorage craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
@@ -56,6 +56,7 @@
     "@types/react": "^19.2.4",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.22",
+    "cross-env": "^10.1.0",
     "postcss": "^8.5.6",
     "react-scripts": "^5.0.1",
     "tailwindcss": "^3.4.18",

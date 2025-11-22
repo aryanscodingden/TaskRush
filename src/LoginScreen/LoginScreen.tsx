@@ -5,7 +5,24 @@ import { ArrowRight, Mail, Gem, Lock, Eye, EyeOff, ArrowLeft, X, AlertCircle, Pa
 import { AnimatePresence, motion, useInView, Variants, Transition } from "framer-motion";
 import type { GlobalOptions as ConfettiGlobalOptions, CreateTypes as ConfettiInstance, Options as ConfettiOptions } from "canvas-confetti"
 import confetti from "canvas-confetti"
-import { supabase, isSupabaseConfigured } from "@/Services/supabase";
+import { supabase } from "@/Services/supabase";
+
+// Local fallback if the services module doesn't export this check
+const isSupabaseConfigured = (() => {
+  try {
+    // Check process.env (CRA/Next)
+    if (process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY) {
+      return true;
+    }
+    const env = (import.meta as any).env;
+    return Boolean(
+      (env?.VITE_SUPABASE_URL || env?.REACT_APP_SUPABASE_URL) &&
+      (env?.VITE_SUPABASE_ANON_KEY || env?.REACT_APP_SUPABASE_ANON_KEY)
+    );
+  } catch {
+    return false;
+  }
+})();
 
 // --- CONFETTI LOGIC ---
 type Api = { fire: (options?: ConfettiOptions) => void }
