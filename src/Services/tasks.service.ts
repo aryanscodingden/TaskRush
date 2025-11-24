@@ -30,6 +30,8 @@ export interface Task {
   completed_at?: string | null;
 }
 
+const getSortOrderValue = () => Math.floor(Date.now() / 1000);
+
 //Lists
 export async function getLists(): Promise<List[]> {
   if (!supabase) throw new Error("Supabase client not initialized");
@@ -59,7 +61,7 @@ export async function createList(
       user_id: user.id,
       name,
       color,
-      sort_order: Date.now(),
+      sort_order: getSortOrderValue(),
     })
     .select()
     .single();
@@ -121,7 +123,7 @@ export async function createTask(task: {
         estimated_minutes: task.estimated_minutes || 25,
         actual_minutes: 0,
         is_completed: false,
-        sort_order: Date.now(),
+        sort_order: getSortOrderValue(),
       })
       .select()
       .single();

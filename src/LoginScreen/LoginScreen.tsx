@@ -180,6 +180,7 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
   const [authStep, setAuthStep] = useState("email");
   const [modalStatus, setModalStatus] = useState<'closed' | 'loading' | 'error' | 'success'>('closed');
   const [modalErrorMessage, setModalErrorMessage] = useState('');
+  const [showResend, setShowResend] = useState(false);
   const confettiRef = useRef<ConfettiRef>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
@@ -230,6 +231,7 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
     if (!isEmailValid || !isPasswordValid) return;
     
     setModalStatus('loading');
+    setShowResend(false);
     
     try {
       const { error } = await supabaseClient.auth.signInWithPassword({
@@ -246,6 +248,9 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
         onAuthSuccess?.();
       }, 2000);
     } catch (error: any) {
+      if (error.message && error.message.includes("Email not confirmed")) {
+        setShowResend(true);
+      }
       setModalErrorMessage(error.message || 'Sign in failed. Please try again.');
       setModalStatus('error');
     }
@@ -259,14 +264,21 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
     }
 
     setModalStatus('loading');
+    setShowResend(false);
     
     try {
-      const { error } = await supabaseClient.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
       });
 
       if (error) throw error;
+
+      if (data.user && !data.session) {
+        setModalErrorMessage("Account created! Please check your email to confirm.");
+        setModalStatus('error');
+        return;
+      }
 
       fireSideCanons();
       setModalStatus('success');
@@ -277,6 +289,23 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
     } catch (error: any) {
       setModalErrorMessage(error.message || 'Sign up failed. Please try again.');
       setModalStatus('error');
+    }
+  };
+
+  const handleResendEmail = async () => {
+    setModalStatus('loading');
+    try {
+        const { error } = await supabaseClient.auth.resend({
+            type: 'signup',
+            email: email,
+        });
+        if (error) throw error;
+        setModalErrorMessage("Confirmation email sent! Please check your inbox.");
+        setModalStatus('error');
+        setShowResend(false);
+    } catch (error: any) {
+        setModalErrorMessage(error.message || "Failed to resend email.");
+        setModalStatus('error');
     }
   };
 
@@ -343,8 +372,11 @@ export const LoginScreen = ({ logo = <DefaultLogo />, brandName = "TaskRush", on
                     {(modalStatus === 'error' || modalStatus === 'success') && <button onClick={closeModal} className="absolute top-2 right-2 p-1 text-muted-foreground hover:text-foreground transition-colors"><X className="w-5 h-5" /></button>}
                     {modalStatus === 'error' && <>
                         <AlertCircle className="w-12 h-12 text-destructive" />
-                        <p className="text-lg font-medium text-foreground">{modalErrorMessage}</p>
-                        <GlassButton onClick={closeModal} size="sm" className="mt-4">Try Again</GlassButton>
+                        <p className="text-lg font-medium text-foreground text-center">{modalErrorMessage}</p>
+                        <div className="flex gap-2 mt-4">
+                            <GlassButton onClick={closeModal} size="sm">Close</GlassButton>
+                            {showResend && <GlassButton onClick={handleResendEmail} size="sm">Resend Email</GlassButton>}
+                        </div>
                     </>}
                     {modalStatus === 'loading' && 
                         <TextLoop interval={TEXT_LOOP_INTERVAL} stopOnEnd={true}>

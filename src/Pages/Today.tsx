@@ -14,6 +14,11 @@ import { GradientBackground } from "../Components/UI/GradientBackground";
 import { BlurFade } from "../Components/UI/BlurFade";
 import { GlassButton } from "../Components/UI/GlassButton";
 import { Plus, Check, List as ListIcon } from "lucide-react";
+import FocusTimer from "../Components/FocusTimer/FocusTimer";
+import { Card, CardContent } from "@/Components/UI/card";
+import { useTimerStore } from "@/Stores/timer.store";
+
+
 
 export default function Today() {
   const { lists, setLists, addList, selectedListId, selectList } = useLists();
@@ -22,25 +27,27 @@ export default function Today() {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newListName, setNewListName] = useState("");
   const [showNewList, setShowNewList] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+
 
   useEffect(() => {
-    loadLists();
-  }, []);
-
-  const loadLists = async () => {
-    try {
-      const listsData = await getLists();
-      setLists(listsData);
-
-      if (listsData.length > 0 && !selectedListId) {
-        const first = listsData[0].id;
-        selectList(first);
-        loadTasks(first);
+    const loadLists = async () => {
+      try {
+        const listsData = await getLists();
+        setLists(listsData);
+  
+        if (listsData.length > 0 && !selectedListId) {
+          const first = listsData[0].id;
+          selectList(first);
+          loadTasks(first);
+        }
+      } catch (err) {
+        console.error("Failed to load lists", err);
       }
-    } catch (err) {
-      console.error("Failed to load lists", err);
-    }
-  };
+    };
+    loadLists();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadTasks = async (listId: string) => {
     try {
@@ -62,7 +69,8 @@ export default function Today() {
 
     try {
       const list = await createList(newListName.trim());
-      addList(list); // Zustand store
+
+      addList(list);
       setNewListName("");
       setShowNewList(false);
 
@@ -72,9 +80,6 @@ export default function Today() {
     }
   };
 
-  // -----------------------------
-  // CREATE NEW TASK
-  // -----------------------------
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim() || !selectedListId) return;
@@ -110,8 +115,14 @@ export default function Today() {
     ? tasks.filter((t) => t.list_id === selectedListId)
     : tasks;
 
+  const startTimerForTask = (task: any) => {
+    const expected = task.estimated_minutes || 25;
+    useTimerStore.getState().start(task.id, task.title, expected);
+  };
+
   return (
     <div className="bg-background h-full w-full flex flex-col relative overflow-hidden text-foreground">
+      <FocusTimer />
       <style>{`
             input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none !important; } input[type="password"]::-webkit-credentials-auto-fill-button, input[type="password"]::-webkit-strong-password-auto-fill-button { display: none !important; } input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active { -webkit-box-shadow: 0 0 0 30px transparent inset !important; -webkit-text-fill-color: var(--foreground) !important; background-color: transparent !important; background-clip: content-box !important; transition: background-color 5000s ease-in-out 0s !important; color: var(--foreground) !important; caret-color: var(--foreground) !important; } input:autofill { background-color: transparent !important; background-clip: content-box !important; -webkit-text-fill-color: var(--foreground) !important; color: var(--foreground) !important; } input:-internal-autofill-selected { background-color: transparent !important; background-image: none !important; color: var(--foreground) !important; -webkit-text-fill-color: var(--foreground) !important; } input:-webkit-autofill::first-line { color: var(--foreground) !important; -webkit-text-fill-color: var(--foreground) !important; }
             @property --angle-1 { syntax: "<angle>"; inherits: false; initial-value: -75deg; } @property --angle-2 { syntax: "<angle>"; inherits: false; initial-value: -45deg; }
@@ -121,7 +132,9 @@ export default function Today() {
             .glass-card { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
       `}</style>
 
-      <div className="absolute inset-0 z-0"><GradientBackground /></div>
+      <div className="absolute inset-0 z-0">
+        <GradientBackground />
+      </div>
 
       <div className="absolute top-4 right-4 z-20">
         <GlassButton onClick={handleSignOut} size="sm">
@@ -134,7 +147,9 @@ export default function Today() {
           {/* Greeting */}
           <BlurFade delay={0.1}>
             <div className="mb-8">
-              <h1 className="text-4xl font-bold mb-2 tracking-tight">Good Afternoon</h1>
+              <h1 className="text-4xl font-bold mb-2 tracking-tight">
+                Good Afternoon
+              </h1>
               <p className="text-muted-foreground text-lg">
                 Ready to Rush through your afternoon?
               </p>
@@ -145,8 +160,13 @@ export default function Today() {
           <div className="mb-12">
             <BlurFade delay={0.2}>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold tracking-tight">Your Lists</h2>
-                <GlassButton size="sm" onClick={() => setShowNewList(!showNewList)}>
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Your Lists
+                </h2>
+                <GlassButton
+                  size="sm"
+                  onClick={() => setShowNewList(!showNewList)}
+                >
                   {showNewList ? "Cancel" : "New List"}
                 </GlassButton>
               </div>
@@ -169,7 +189,11 @@ export default function Today() {
                         className="relative z-10 h-full w-0 flex-grow bg-transparent text-foreground placeholder:text-foreground/60 focus:outline-none"
                       />
                       <div className="relative z-10 flex-shrink-0 pr-1">
-                        <GlassButton type="submit" size="icon" contentClassName="text-foreground/80 hover:text-foreground">
+                        <GlassButton
+                          type="submit"
+                          size="icon"
+                          contentClassName="text-foreground/80 hover:text-foreground"
+                        >
                           <Plus className="w-5 h-5" />
                         </GlassButton>
                       </div>
@@ -185,7 +209,9 @@ export default function Today() {
                   <div
                     className={cn(
                       "glass-card rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:bg-white/10",
-                      selectedListId === list.id ? "ring-2 ring-primary bg-white/10" : ""
+                      selectedListId === list.id
+                        ? "ring-2 ring-primary bg-white/10"
+                        : ""
                     )}
                     onClick={() => handleSelectList(list.id)}
                   >
@@ -243,37 +269,59 @@ export default function Today() {
             <div className="space-y-3">
               {filteredTasks.map((task, i) => (
                 <BlurFade key={task.id} delay={0.05 * i}>
-                  <div className="glass-card rounded-xl p-4 flex items-center gap-4 group hover:bg-white/10 transition-colors">
-                    <div 
-                        className={cn(
+                  <Card className="border-zinc-800 glass-card rounded-xl p-4 hover:bg-white/10 transition-colors">
+                    <CardContent className="flex items-center justify-between gap-4 p-0">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div
+                          className={cn(
                             "w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors",
-                            task.is_completed ? "bg-primary border-primary" : "border-muted-foreground hover:border-primary"
-                        )}
-                        onClick={() => handleToggleTask(task.id, !task.is_completed)}
-                    >
-                        {task.is_completed && <Check className="w-3.5 h-3.5 text-primary-foreground" />}
-                    </div>
-                    
-                    <span
-                      className={cn(
-                        "flex-1 text-lg transition-all",
-                        task.is_completed ? "line-through text-muted-foreground" : "text-foreground"
-                      )}
-                    >
-                      {task.title}
-                    </span>
+                            task.is_completed
+                              ? "bg-primary border-primary"
+                              : "border-muted-foreground hover:border-primary"
+                          )}
+                          onClick={() =>
+                            handleToggleTask(task.id, !task.is_completed)
+                          }
+                        >
+                          {task.is_completed && (
+                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                          )}
+                        </div>
 
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        {/* Placeholder for actions */}
-                    </div>
-                  </div>
+                        <div className="flex flex-col">
+                          <span
+                            className={cn(
+                              "text-lg transition-all",
+                              task.is_completed
+                                ? "line-through text-muted-foreground"
+                                : "text-foreground"
+                            )}
+                          >
+                            {task.title}
+                          </span>
+                          <span className="text-xs text-zinc-400">
+                            Est: {task.estimated_minutes || 25} mins
+                          </span>
+                        </div>
+                      </div>
+
+                      {!task.is_completed && (
+                        <button
+                          onClick={() => startTimerForTask(task)}
+                          className="px-3 py-1 text-sm font-medium rounded-md bg-gradient-to-r from-teal-400 to lime-400 text-black hover:opacity-90 transition"
+                        >
+                          Start
+                        </button>
+                      )}
+                    </CardContent>
+                  </Card>
                 </BlurFade>
               ))}
-              
+
               {filteredTasks.length === 0 && selectedListId && (
-                  <div className="text-center py-12 text-muted-foreground">
-                      <p>No tasks yet. Add one above!</p>
-                  </div>
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No tasks yet. Add one above!</p>
+                </div>
               )}
             </div>
           </div>

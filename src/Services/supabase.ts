@@ -10,22 +10,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 
-const inMemoryStorage = new Map<string, string>();
-
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: {
-      getItem: (key: string) => inMemoryStorage.get(key) || null,
-      setItem: (key: string, value: string) => {
-        inMemoryStorage.set(key, value);
-      },
-      removeItem: (key: string) => {
-        inMemoryStorage.delete(key);
-      },
-    },
   },
 });
 
