@@ -13,15 +13,18 @@ import { BlurFade } from "../Components/UI/BlurFade";
 import { GlassButton } from "../Components/UI/GlassButton";
 import AddTaskModal from "../Components/FocusTimer/AddTaskModal";
 import FocusTimer from "../Components/FocusTimer/FocusTimer";
-import { Check, Plus } from "lucide-react";
+import AddListModal from "../Components/Lists/AddListModal";
+import { deleteList } from "../Services/tasks.service";
+import { Check, List, Plus, Trash2 } from "lucide-react";
 import { useTimerStore } from "../Stores/timer.store";
 import { Card, CardContent } from "../Components/UI/card";
+import { supabase } from "@/Services/supabase";
 
 export default function Today() {
   const { lists, setLists, addList, selectedListId, selectList } = useLists();
   const { tasks, setTasks, updateTask } = useTasks();
-
-  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addTaskModalOpen, setAddTaskModalOpen] = useState(false);
+  const [addListModalOpen, setAddListModalOpen] = useState(false);
 
   useEffect(() => {
     loadLists();
@@ -53,6 +56,24 @@ export default function Today() {
   const handleSelectList = async (listId: string) => {
     selectList(listId);
     await loadTasks(listId);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
+  const handleDeleteList = async (id: string) => {
+    const confirmDelete = window.confirm("Delete this list?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteList(id);
+      setLists(lists.filter((l) => l.id !== id));
+      if (selectedListId === id) selectList(null);
+    } catch (err) {
+      console.error("Failed deleting list", err);
+    }
   };
 
   const handleCreateList = async (e: React.FormEvent) => {
@@ -91,14 +112,21 @@ export default function Today() {
       <div className="absolute inset-0 z-0">
         <GradientBackground />
       </div>
-
       <div className="relative z-10 flex-1 overflow-y-auto p-8">
+        <div className="absolute top-6 right-6 z-20">
+          <GlassButton size="sm" onClick={handleSignOut}>
+            Sign Out
+          </GlassButton>
+        </div>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-12 gap-8">
             <aside className="col-span-3">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold tracking-tight">Lists</h3>
-                <GlassButton size="sm" onClick={() => setAddModalOpen(true)}>
+                <GlassButton
+                  size="sm"
+                  onClick={() => setAddListModalOpen(true)}
+                >
                   <Plus className="w-4 h-4" />
                 </GlassButton>
               </div>
@@ -107,21 +135,35 @@ export default function Today() {
                 {lists.map((list) => (
                   <BlurFade key={list.id} className="block">
                     <div
-                      onClick={() => handleSelectList(list.id)}
                       className={cn(
-                        "glass-card rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:bg-white/10",
+                        "glass-card rounded-2xl p-4 flex items-center justify-between gap-4 cursor-pointer transition-all duration-300 group relative",
                         selectedListId === list.id
                           ? "ring-2 ring-primary bg-white/10"
-                          : ""
+                          : "hover:bg-white/5"
                       )}
                     >
-                      <div>
-                        <div className="font-medium">{list.name}</div>
-                        <div className="text-xs text-zinc-400">
+                      <div
+                        className="flex-1"
+                        onClick={() => handleSelectList(list.id)}
+                      >
+                        <div className="font-semibold text-[15px] truncate">
+                          {list.name}
+                        </div>
+                        <div className="text-xs text-zinc-400 mt-1">
                           {tasks.filter((t) => t.list_id === list.id).length}{" "}
                           tasks
                         </div>
                       </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteList(list.id);
+                        }}
+                        className="p-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </BlurFade>
                 ))}
@@ -142,7 +184,7 @@ export default function Today() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <GlassButton onClick={() => setAddModalOpen(true)}>
+                  <GlassButton onClick={() => setAddTaskModalOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Task
                   </GlassButton>
@@ -221,10 +263,13 @@ export default function Today() {
 
       <FocusTimer />
       <AddTaskModal
-        open={addModalOpen}
-        onClose={() => {
-          setAddModalOpen(false);
-        }}
+        open={addTaskModalOpen}
+        onClose={() => setAddTaskModalOpen(false)}
+      />
+
+      <AddListModal
+        open={addListModalOpen}
+        onClose={() => setAddListModalOpen(false)}
       />
     </div>
   );
