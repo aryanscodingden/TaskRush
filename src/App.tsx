@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LoginScreen } from './LoginScreen/LoginScreen';
 import { supabase } from './Services/supabase';
-import Today from "./Pages/Today";
+import Today from './Pages/Today';
 
 const MainApp = () => {
   return (

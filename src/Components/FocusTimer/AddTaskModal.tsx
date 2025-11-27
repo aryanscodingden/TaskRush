@@ -4,28 +4,10 @@ import { useLists } from "@/Stores/lists.store";
 import { useTasks } from "@/Stores/tasks.store";
 import { BlurFade } from "../UI/BlurFade";
 import { X } from "lucide-react";
-import { parse } from "path";
 
 interface AddTaskModalProps {
     open: boolean;
     onClose: () => void;
-}
-
-function normalizeTimeInput(raw: string) {
-    const cleaned = raw.replace(/[^\d:]/g, "");
-    const parts = cleaned.split(":").slice(0,2);
-    let mm = parts[0] || "0";
-    let ss = parts[1] || "0";
-
-    if (parts.length === 1 && mm.length > 2) {
-        mm = mm.slice(0,3);
-    }
-    const mmN = parseInt(mm || "0", 10) || 0;
-    let ssN = parseInt(ss || "0", 10) || 0;
-    if (ssN >= 60) {
-        ssN = ssN % 60;
-    }
-    return `${String(mmN)}:${String(ssN).padStart(2, "0")}`;
 }
 
 function parseMmSsToMinutes(timeStr: string): number {

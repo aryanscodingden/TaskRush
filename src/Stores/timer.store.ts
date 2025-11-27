@@ -1,4 +1,5 @@
-import { create } from "zustand"; // updated
+import { create } from "zustand"; 
+import { Task } from "../Services/tasks.service";
 
 type TimerState = {
   taskId: string | null;
@@ -11,6 +12,7 @@ type TimerState = {
   finished: boolean;
 
   start: (taskId: string, title: string, expected: number) => void;
+  startTimerForTask: (task: Task) => void;
   pause: () => void;
   resume: () => void;
   tick: () => void;
@@ -41,6 +43,11 @@ export const useTimerStore = create<TimerState>((set, get) => ({
       startedAt: Date.now(),
       finished: false,
     });
+  },
+
+  startTimerForTask: (task: Task) => {
+    const expected = task.estimated_minutes || 25;
+    get().start(task.id, task.title, expected);
   },
 
   pause: () => set({ isRunning: false }),
