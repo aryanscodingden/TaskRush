@@ -25,6 +25,7 @@ export default function Today() {
   const { tasks, setTasks, updateTask } = useTasks();
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false);
   const [addListModalOpen, setAddListModalOpen] = useState(false);
+  const [listToDelete, setListToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadLists();
@@ -64,9 +65,8 @@ export default function Today() {
   };
 
   const handleDeleteList = async (id: string) => {
-    const confirmDelete = window.confirm("Delete this list?");
-    if (!confirmDelete) return;
-
+    setListToDelete(id);
+  
     try {
       await deleteList(id);
       setLists(lists.filter((l) => l.id !== id));
@@ -96,6 +96,14 @@ export default function Today() {
     } catch (err) {
       console.error("Failed to toggle", err);
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!listToDelete) return; 
+    await deleteList(listToDelete);
+    setLists(lists.filter((l) => l.id !== listToDelete));
+    if (selectedListId === listToDelete) selectList(null);
+    setListToDelete(null);
   };
 
   const startTimerForTask = (task: any) => {
@@ -271,6 +279,33 @@ export default function Today() {
         open={addListModalOpen}
         onClose={() => setAddListModalOpen(false)}
       />
+
+      {listToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-zinc-900 mb-3">Delete list?</h3>
+            <p className="text-sm text-zinc-600 mb-6">
+              This will remove the list and all tasks inside it.
+            </p>
+            
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setListToDelete(null)}
+                className="px-4 py-2 rounded-md text-sm font-medium bg-zinc-200 text-zinc-900 hover:bg-zinc-300"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
