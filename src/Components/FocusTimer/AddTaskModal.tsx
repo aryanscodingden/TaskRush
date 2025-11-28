@@ -22,6 +22,7 @@ export default function AddTaskModal({open, onClose}: AddTaskModalProps) {
     const {addTask} = useTasks();
     const [title, setTitle] = useState("");
     const [timeStr, setTimeStr] = useState("0:00");
+    const [priority, setPriority] = useState(2);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -69,76 +70,66 @@ export default function AddTaskModal({open, onClose}: AddTaskModalProps) {
 
 return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-auto">
-        <div className="absoulute inset-0 bg-white/60 backdrop-blur-sm"/>
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"/>
         <BlurFade className="relative z-10 w-full max-w-md">
-        <div className="flex items-center justify-between mb-4">
-        <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-zinc-700 hover: tex-black"
-            >
-                <X size={18} />
-                <span className="uppercase text-xs font-semibold">Cancel</span>
-            </button>
+            <div className="flex items-center justify-between mb-4">
+                <button
+                    onClick={onClose}
+                    className="flex items-center gap-2 text-zinc-700 hover:text-black"
+                >
+                    <X size={18} />
+                    <span className="uppercase text-xs font-semibold">Cancel</span>
+                </button>
             </div>
 
             <div className="flex items-center gap-3 mb-3">
                 <div className="flex-1">
-                <label className="text-xs text-zinc-500">Title</label>
-                <input 
-                    ref={inputRef}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Task title...."
-                    className="mt-1 w-full px-3 py-2 border border-zinc-200 rounded-md bg-white focus:outline-none focus:ring-1 focus: ring-teal-300"
+                    <label className="text-xs text-zinc-500">Title</label>
+                    <input 
+                        ref={inputRef}
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Task title...."
+                        className="mt-1 w-full px-3 py-2 border border-zinc-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-teal-300"
                     />
-                    </div>
+                </div>
+            <div className="mb-4">
+                <label className="text-xs text-zinc-500">Priority</label>
+                <select 
+                    value={priority}
+                    onChange={(e) => setPriority(Number(e.target.value))}
+                    className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-200 bg-white text-black focus:outline-none focus:ring-1 focus:ring-teal-300"
+                >
+                    <option value={1}>P1 - High</option>
+                    <option value={2}>P2 - Medium</option>
+                    <option value={3}>P3 - Low</option>
+                </select>
+            </div>
 
                 <div className="w-24">
                     <label className="text-xs text-zinc-500">Est. Time</label>
                     <input 
                         value={timeStr}
                         onChange={(e) => handleTimeChange(e.target.value)}
-                        className="mt-1 w-full text-center px-3 py-2 border border-zinc-200 rounded-md bg-white text-black focus: outline-none focus: ring-1 focus:ring-teal-300"
+                        className="mt-1 w-full text-center px-3 py-2 border border-zinc-200 rounded-md bg-white text-black focus:outline-none focus:ring-1 focus:ring-teal-300"
                         placeholder="0:00"
-                        />
-                    </div>
-                    </div>
+                    />
+                </div>
+            </div>
                  
 
-                <div className="text-xs text-zinc-500 mb-4">Add a new task</div>
+            <div className="text-xs text-zinc-500 mb-4">Add a new task</div>
 
-                <div className="flex gap-3">
-                    <button
-                        onClick={handleConfirm}
-                        className="ml-auto px-4 py-2 rounded-full bg-gradient-to-r from-teal-400 to lime-400 text-black font-semibold"
-                        >
-                            Confirm
-                        </button>
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-                
-
+            <div className="flex gap-3">
+                <button
+                    onClick={handleConfirm}
+                    className="ml-auto px-4 py-2 rounded-full bg-gradient-to-r from-teal-400 to-lime-400 text-black font-semibold"
+                >
+                    Confirm
+                </button>
+            </div>
         </BlurFade>
-
-
-
-
-
-
-
-
     </div>
-)
+);
 
 }
