@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { LoginScreen } from './LoginScreen/LoginScreen';
+import React, { useEffect, useState } from 'react';
 import { supabase } from './Services/supabase';
 import Today from './Pages/Today';
+import HeroSection from './Pages/landing/HeroSection'
+import LoginScreen from "./LoginScreen/LoginScreen";
+
 
 const MainApp = () => {
   return (
@@ -16,6 +18,8 @@ const MainApp = () => {
 function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,18 +36,25 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="text-white">Loading..</div>
-      </div>
-    );
-  }
+if (loading) {
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="text-white">Loading..</div>
+    </div>
+  );
+}
 
-  if (!session) {
-    return <LoginScreen />;
-  }
+if (!session) {
+  if (showLogin) return <LoginScreen />;
 
+  return (
+    <div className="min-h-screen w-full bg-background text-foreground">
+      <HeroSection onGetStarted={() => setShowLogin(true)} />
+    </div>
+  );
+}
+
+// Authenticated, show main app
   return <MainApp />;
 }
 
