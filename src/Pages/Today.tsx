@@ -26,6 +26,8 @@ export default function Today() {
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false);
   const [addListModalOpen, setAddListModalOpen] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTime, setEditTime] = useState("");
 
   useEffect(() => {
     loadLists();
@@ -98,8 +100,28 @@ export default function Today() {
     }
   };
 
+  const parseMmSsToMinutes = (str: string) => {
+    const [mm, ss] = str.split(":").map(Number);
+    return mm + (ss || 0) / 60;
+  };
+
+  const handleSaveEst = async (taskId: string) => {
+    const mins = parseMmSsToMinutes(editTime);
+    try {
+      await updateTask(taskId, { estimated_minutes: mins });
+    } catch (err) {
+      console.error("Failed updating est", err);
+    }
+    cancelEdit();
+  };
+
+  const cancelEdit = () => {
+    setEditingTaskId(null);
+    setEditTime("");
+  };
+
   const handleConfirmDelete = async () => {
-    if (!listToDelete) return; 
+    if (!listToDelete) return;
     await deleteList(listToDelete);
     setLists(lists.filter((l) => l.id !== listToDelete));
     if (selectedListId === listToDelete) selectList(null);
@@ -240,9 +262,30 @@ export default function Today() {
                             </div>
 
                             <div className="flex items-center gap-3 mt-1">
-                              <span className="text-xs text-zinc-400">
-                                Est: {task.estimated_minutes || 25} mins
-                              </span>
+                              <div className="text-xs text-zinc-400">
+                                {editingTaskId === task.id ? (
+                                  <input
+                                    className="px-2 py-1 bg-white/20 border border-zinc-300 text-foreground rounded-md w-20 text-center"
+                                    value={editTime}
+                                    onChange={(e) => setEditTime(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") handleSaveEst(task.id);
+                                      if (e.key === "Escape") cancelEdit();
+                                    }}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <span
+                                    className="cursor-pointer hover:text-foreground"
+                                    onClick={() => {
+                                      setEditingTaskId(task.id);
+                                      setEditTime(`${task.estimated_minutes || 25}:00`);
+                                    }}
+                                  >
+                                    Est: {task.estimated_minutes || 25} mins
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-xs text-zinc-400">
                                 Created{" "}
                                 {new Date(task.created_at).toLocaleDateString()}
