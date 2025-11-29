@@ -25,6 +25,7 @@ export default function AddTaskModal({open, onClose}: AddTaskModalProps) {
     const [priority, setPriority] = useState(2);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
+
     useEffect(() => {
         if (open) {
             setTimeout(() => inputRef.current?.focus(), 70);
@@ -58,6 +59,7 @@ export default function AddTaskModal({open, onClose}: AddTaskModalProps) {
                title: title.trim(),
                list_id: selectedListId,
                estimated_minutes: estMinute,
+               priority: priority,
         });
         addTask(created);
         setTitle("");
@@ -93,16 +95,16 @@ return (
                         className="mt-1 w-full px-3 py-2 border border-zinc-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-teal-300"
                     />
                 </div>
-            <div className="mb-4">
+            <div className="w-20">
                 <label className="text-xs text-zinc-500">Priority</label>
                 <select 
                     value={priority}
                     onChange={(e) => setPriority(Number(e.target.value))}
                     className="mt-1 w-full px-3 py-2 rounded-md border border-zinc-200 bg-white text-black focus:outline-none focus:ring-1 focus:ring-teal-300"
                 >
-                    <option value={1}>P1 - High</option>
-                    <option value={2}>P2 - Medium</option>
-                    <option value={3}>P3 - Low</option>
+                    <option value={1}>P1</option>
+                    <option value={2}>P2</option>
+                    <option value={3}>P3</option>
                 </select>
             </div>
 

@@ -133,9 +133,10 @@ export default function Today() {
     useTimerStore.getState().start(task.id, task.title, expected);
   };
 
-  const filteredTasks = selectedListId
+  const filteredTasks = (selectedListId
     ? tasks.filter((t) => t.list_id === selectedListId)
-    : tasks;
+    : tasks
+  ).sort((a, b) => (a.priority ?? 3) - (b.priority ?? 3));
 
   return (
     <div className="bg-background h-full w-full flex flex-col relative overflow-hidden text-foreground">
@@ -248,6 +249,20 @@ export default function Today() {
                               <Check className="w-3.5 h-3.5 text-primary-foreground" />
                             )}
                           </div>
+                          <select 
+                            className="bg-transperent text-xs text-zinc-400 outline-none"
+                            value={task.priority ?? 3}
+                            onChange={async (e) => {
+                              const newPriority = parseInt(e.target.value);
+                              await updateTask(task.id, {priority: newPriority});
+                              updateTask(task.id, {priority:newPriority});
+                            }}
+                            >
+                              <option value={1}>P1</option>
+                              <option value={2}>P2</option>
+                              <option value={3}>P3</option>
+                              <option value={4}>P4</option>
+                            </select>
 
                           <div className="flex-1 min-w-0">
                             <div
@@ -260,6 +275,19 @@ export default function Today() {
                             >
                               {task.title}
                             </div>
+                            {task.priority && (
+                              <span 
+                                className={cn(
+                                  "text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide",
+                                  task.priority === 1 && "bg-red-500/20 text-red-400",
+                                  task.priority === 2 && "bg-orange-500/20 text-orange-400",
+                                  task.priority === 3 && "bg-blue-500/20 text-blue-400",
+                                  task.priority === 4 && "bg-gray-500/20 text-gray-400"
+                                )}
+                              >
+                                P{task.priority}
+                              </span>
+                            )}
 
                             <div className="flex items-center gap-3 mt-1">
                               <div className="text-xs text-zinc-400">

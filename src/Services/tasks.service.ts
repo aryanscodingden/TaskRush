@@ -23,6 +23,7 @@ export interface Task {
   is_completed: boolean;
   estimated_minutes: number;
   actual_minutes: number;
+  priority?: number;
   sort_order: number;
   scheduled_date?: string | null;
   created_at: string;
@@ -108,6 +109,7 @@ export async function createTask(task: {
     title: string;
     list_id: string;
     estimated_minutes: number;
+    priority?: number;
 }): Promise<Task> {
     if (!supabase) throw new Error("Supabase client not initialized");
     
@@ -121,6 +123,7 @@ export async function createTask(task: {
         title: task.title,
         list_id: task.list_id,
         estimated_minutes: task.estimated_minutes || 25,
+        priority: task.priority || 2,
         actual_minutes: 0,
         is_completed: false,
         sort_order: getSortOrderValue(),
