@@ -20,7 +20,12 @@ import { useTimerStore } from "../Stores/timer.store";
 import { Card, CardContent } from "../Components/UI/card";
 import { supabase } from "@/Services/supabase";
 
-export default function Today() {
+
+interface TodayProps {
+  setMode: (mode: "todo" | "focus") => void;
+}
+
+export default function Today({ setMode }: TodayProps) {
   const { lists, setLists, addList, selectedListId, selectList } = useLists();
   const { tasks, setTasks, updateTask } = useTasks();
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false);
@@ -68,7 +73,7 @@ export default function Today() {
 
   const handleDeleteList = async (id: string) => {
     setListToDelete(id);
-  
+
     try {
       await deleteList(id);
       setLists(lists.filter((l) => l.id !== id));
@@ -133,9 +138,8 @@ export default function Today() {
     useTimerStore.getState().start(task.id, task.title, expected);
   };
 
-  const filteredTasks = (selectedListId
-    ? tasks.filter((t) => t.list_id === selectedListId)
-    : tasks
+  const filteredTasks = (
+    selectedListId ? tasks.filter((t) => t.list_id === selectedListId) : tasks
   ).sort((a, b) => (a.priority ?? 3) - (b.priority ?? 3));
 
   return (
@@ -219,6 +223,13 @@ export default function Today() {
                     <Plus className="w-4 h-4 mr-2" />
                     Add Task
                   </GlassButton>
+                  <button
+                     onClick={() => setMode("focus")}
+                    className="px-3 py-1 text-sm font-medium rounded-md bg-indigo-500 text-white hover:bg-indigo-600 transition"
+                    >
+                      Focus Mode
+                  </button>
+
                 </div>
               </div>
 
@@ -249,20 +260,22 @@ export default function Today() {
                               <Check className="w-3.5 h-3.5 text-primary-foreground" />
                             )}
                           </div>
-                          <select 
+                          <select
                             className="bg-transperent text-xs text-zinc-400 outline-none"
                             value={task.priority ?? 3}
                             onChange={async (e) => {
                               const newPriority = parseInt(e.target.value);
-                              await updateTask(task.id, {priority: newPriority});
-                              updateTask(task.id, {priority:newPriority});
+                              await updateTask(task.id, {
+                                priority: newPriority,
+                              });
+                              updateTask(task.id, { priority: newPriority });
                             }}
-                            >
-                              <option value={1}>P1</option>
-                              <option value={2}>P2</option>
-                              <option value={3}>P3</option>
-                              <option value={4}>P4</option>
-                            </select>
+                          >
+                            <option value={1}>P1</option>
+                            <option value={2}>P2</option>
+                            <option value={3}>P3</option>
+                            <option value={4}>P4</option>
+                          </select>
 
                           <div className="flex-1 min-w-0">
                             <div
@@ -276,13 +289,17 @@ export default function Today() {
                               {task.title}
                             </div>
                             {task.priority && (
-                              <span 
+                              <span
                                 className={cn(
                                   "text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide",
-                                  task.priority === 1 && "bg-red-500/20 text-red-400",
-                                  task.priority === 2 && "bg-orange-500/20 text-orange-400",
-                                  task.priority === 3 && "bg-blue-500/20 text-blue-400",
-                                  task.priority === 4 && "bg-gray-500/20 text-gray-400"
+                                  task.priority === 1 &&
+                                    "bg-red-500/20 text-red-400",
+                                  task.priority === 2 &&
+                                    "bg-orange-500/20 text-orange-400",
+                                  task.priority === 3 &&
+                                    "bg-blue-500/20 text-blue-400",
+                                  task.priority === 4 &&
+                                    "bg-gray-500/20 text-gray-400"
                                 )}
                               >
                                 P{task.priority}
@@ -295,9 +312,12 @@ export default function Today() {
                                   <input
                                     className="px-2 py-1 bg-white/20 border border-zinc-300 text-foreground rounded-md w-20 text-center"
                                     value={editTime}
-                                    onChange={(e) => setEditTime(e.target.value)}
+                                    onChange={(e) =>
+                                      setEditTime(e.target.value)
+                                    }
                                     onKeyDown={(e) => {
-                                      if (e.key === "Enter") handleSaveEst(task.id);
+                                      if (e.key === "Enter")
+                                        handleSaveEst(task.id);
                                       if (e.key === "Escape") cancelEdit();
                                     }}
                                     autoFocus
@@ -307,7 +327,9 @@ export default function Today() {
                                     className="cursor-pointer hover:text-foreground"
                                     onClick={() => {
                                       setEditingTaskId(task.id);
-                                      setEditTime(`${task.estimated_minutes || 25}:00`);
+                                      setEditTime(
+                                        `${task.estimated_minutes || 25}:00`
+                                      );
                                     }}
                                   >
                                     Est: {task.estimated_minutes || 25} mins
@@ -354,11 +376,13 @@ export default function Today() {
       {listToDelete && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-zinc-900 mb-3">Delete list?</h3>
+            <h3 className="text-lg font-bold text-zinc-900 mb-3">
+              Delete list?
+            </h3>
             <p className="text-sm text-zinc-600 mb-6">
               This will remove the list and all tasks inside it.
             </p>
-            
+
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setListToDelete(null)}

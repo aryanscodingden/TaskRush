@@ -3,13 +3,15 @@ import { supabase } from './Services/supabase';
 import Today from './Pages/Today';
 import HeroSection from './Pages/landing/HeroSection'
 import LoginScreen from "./LoginScreen/LoginScreen";
+import FocusMode from './Pages/FocusMode';
+import { Main } from 'next/document';
 
 
-const MainApp = () => {
+const MainApp = ({ setMode }: { setMode: (mode: "todo" | "focus") => void }) => {
   return (
     <div className="h-screen w-full bg-zinc-950 text-white flex flex-col overflow-hidden">
       <main className='flex-1 relative overflow-hidden'>
-        <Today/>
+        <Today setMode={setMode} />
       </main>
     </div>
   );
@@ -19,6 +21,7 @@ function App() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  const [mode, setMode] = useState<"todo" | "focus">("todo");
 
 
   useEffect(() => {
@@ -45,17 +48,17 @@ if (loading) {
 }
 
 if (!session) {
-  if (showLogin) return <LoginScreen />;
-
-  return (
-    <div className="min-h-screen w-full bg-background text-foreground">
-      <HeroSection onGetStarted={() => setShowLogin(true)} />
-    </div>
-  );
+  return <HeroSection onGetStarted={() => setShowLogin(true)} />; 
 }
 
-// Authenticated, show main app
-  return <MainApp />;
+return mode === "focus" ? (
+  <FocusMode
+    onBackToTasks={() => setMode("todo")}
+    onPickTask={() => setMode("todo")}
+  />
+) : (
+  <MainApp setMode={setMode} />
+);
 }
 
 export default App;
