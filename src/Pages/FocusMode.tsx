@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Play, Pause, RotateCcw, ChevronLeft } from "lucide-react";
 import { GradientBackground } from "@/Components/UI/GradientBackground";
 import GlassButtonSwitch from "@/Components/UI/GlassToggle";
+import TaskPickerModal from "@/Components/FocusTimer/TaskPickerModal";
 
 type FocusModeProps = {
     onBackToTasks: () => void;
@@ -11,6 +12,7 @@ type FocusModeProps = {
 export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) {
     const [seconds, setSeconds] = useState(25*60);
     const [isRunning, setIsRunning] = useState(false);
+    const [pickerOpen, setPickerOpen] = useState(false);
 
     useEffect(() => {
         if (!isRunning) return; 
@@ -39,6 +41,8 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
             
             <div className="relative z-10 w-full h-full flex flex-col items-center">
                 {/* Centered Mode Switch */}
+
+                <TaskPickerModal open={pickerOpen} onClose={() => setPickerOpen(false)} />
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
                     <GlassButtonSwitch
                         current="Focus"
@@ -59,7 +63,7 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
                 </button>
             
                 <button 
-                    onClick={onPickTask}
+                    onClick={() => setPickerOpen(true)}
                     className="absolute top-6 right-6 px-4 py-2 text-black font-semibold bg-white rounded-xl hover:opacity-90 transition"
                 >
                     Choose Task
