@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Play, Pause, RotateCcw, ChevronLeft } from "lucide-react";
 import { GradientBackground } from "@/Components/UI/GradientBackground";
+import GlassButtonSwitch from "@/Components/UI/GlassToggle";
 
 type FocusModeProps = {
     onBackToTasks: () => void;
@@ -37,6 +38,18 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
             </div>
             
             <div className="relative z-10 w-full h-full flex flex-col items-center">
+                {/* Centered Mode Switch */}
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
+                    <GlassButtonSwitch
+                        current="Focus"
+                        onSwitch={(mode) => {
+                            if (mode === "Todo") {
+                                onBackToTasks();
+                            }
+                        }}
+                    />
+                </div>
+
                 <button
                     onClick={onBackToTasks}
                     className="absolute top-6 left-6 flex items-center gap-2 text-sm opacity-80 hover:opacity-100"

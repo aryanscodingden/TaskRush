@@ -19,13 +19,15 @@ import { Check, List, Plus, Trash2 } from "lucide-react";
 import { useTimerStore } from "../Stores/timer.store";
 import { Card, CardContent } from "../Components/UI/card";
 import { supabase } from "@/Services/supabase";
+import GlassButtonSwitch from "@/Components/UI/GlassToggle";
+
 
 
 interface TodayProps {
-  setMode: (mode: "todo" | "focus") => void;
+  onSwitchMode: (mode: "todo" | "focus") => void;
 }
 
-export default function Today({ setMode }: TodayProps) {
+export default function Today({ onSwitchMode }: TodayProps) {
   const { lists, setLists, addList, selectedListId, selectList } = useLists();
   const { tasks, setTasks, updateTask } = useTasks();
   const [addTaskModalOpen, setAddTaskModalOpen] = useState(false);
@@ -33,6 +35,14 @@ export default function Today({ setMode }: TodayProps) {
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editTime, setEditTime] = useState("");
+
+  const handleSwitch = (mode: string) => {
+    if (mode === "Focus") {
+      onSwitchMode("focus");
+    } else if (mode === "Todo") {
+      onSwitchMode("todo");
+    }
+  };
 
   useEffect(() => {
     loadLists();
@@ -70,6 +80,7 @@ export default function Today({ setMode }: TodayProps) {
     await supabase.auth.signOut();
     window.location.reload();
   };
+
 
   const handleDeleteList = async (id: string) => {
     setListToDelete(id);
@@ -147,12 +158,22 @@ export default function Today({ setMode }: TodayProps) {
       <div className="absolute inset-0 z-0">
         <GradientBackground />
       </div>
+
       <div className="relative z-10 flex-1 overflow-y-auto p-8">
         <div className="absolute top-6 right-6 z-20">
           <GlassButton size="sm" onClick={handleSignOut}>
             Sign Out
           </GlassButton>
         </div>
+        
+        {/* Centered Mode Switch */}
+        <div className="flex justify-center mb-4 mt-2">
+          <GlassButtonSwitch
+            current="Todo"
+            onSwitch={handleSwitch}
+          />
+        </div>
+
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-12 gap-8">
             <aside className="col-span-3">
@@ -223,13 +244,6 @@ export default function Today({ setMode }: TodayProps) {
                     <Plus className="w-4 h-4 mr-2" />
                     Add Task
                   </GlassButton>
-                  <button
-                     onClick={() => setMode("focus")}
-                    className="px-3 py-1 text-sm font-medium rounded-md bg-indigo-500 text-white hover:bg-indigo-600 transition"
-                    >
-                      Focus Mode
-                  </button>
-
                 </div>
               </div>
 

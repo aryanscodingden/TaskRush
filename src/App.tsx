@@ -11,7 +11,7 @@ const MainApp = ({ setMode }: { setMode: (mode: "todo" | "focus") => void }) => 
   return (
     <div className="h-screen w-full bg-zinc-950 text-white flex flex-col overflow-hidden">
       <main className='flex-1 relative overflow-hidden'>
-        <Today setMode={setMode} />
+        <Today onSwitchMode={setMode} />
       </main>
     </div>
   );
