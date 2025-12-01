@@ -14,13 +14,13 @@ import { GlassButton } from "../Components/UI/GlassButton";
 import AddTaskModal from "../Components/FocusTimer/AddTaskModal";
 import FocusTimer from "../Components/FocusTimer/FocusTimer";
 import AddListModal from "../Components/Lists/AddListModal";
+import TaskNotesDrawer from "@/Components/Task/TaskNotesDrawer";
 import { deleteList } from "../Services/tasks.service";
 import { Check, List, Plus, Trash2 } from "lucide-react";
 import { useTimerStore } from "../Stores/timer.store";
 import { Card, CardContent } from "../Components/UI/card";
 import { supabase } from "@/Services/supabase";
 import GlassButtonSwitch from "@/Components/UI/GlassToggle";
-
 
 
 interface TodayProps {
@@ -35,6 +35,8 @@ export default function Today({ onSwitchMode }: TodayProps) {
   const [listToDelete, setListToDelete] = useState<string | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editTime, setEditTime] = useState("");
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [activeTask, setActiveTask] = useState<any>(null);
 
   const handleSwitch = (mode: string) => {
     if (mode === "Focus") {
@@ -291,7 +293,13 @@ export default function Today({ onSwitchMode }: TodayProps) {
                             <option value={4}>P4</option>
                           </select>
 
-                          <div className="flex-1 min-w-0">
+                          <div
+                             className="flex-1 min-w-0 cursor-pointer"
+                             onClick={() => {
+                              setNotesOpen(true)
+                              setActiveTask(task)
+                             }}
+                          >
                             <div
                               className={cn(
                                 "text-lg transition-all",
@@ -302,6 +310,7 @@ export default function Today({ onSwitchMode }: TodayProps) {
                             >
                               {task.title}
                             </div>
+
                             {task.priority && (
                               <span
                                 className={cn(
@@ -421,6 +430,11 @@ export default function Today({ onSwitchMode }: TodayProps) {
           </div>
         </div>
       )}
+    <TaskNotesDrawer
+    open={notesOpen}
+    task={activeTask}
+    onClose={() => setNotesOpen(false)}
+/>
     </div>
   );
 }

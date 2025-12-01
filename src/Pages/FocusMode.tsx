@@ -14,7 +14,7 @@ type FocusModeProps = {
 
 export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     const [pickerOpen, setPickerOpen] = useState(false);
-    const { loadTasks } = useTasks();
+    const { updateTask } = useTasks();
     const {
         taskId,
         taskTitle, 
@@ -35,7 +35,6 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
         }
     }, [taskTitle]);
 
-    // Tick the timer every second
     useEffect(() => {
         if (!isRunning) return;
         
@@ -47,7 +46,18 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     }, [isRunning, tick]);
 
     useEffect(() => {
-        if (remainingSeconds === 0 && taskTitle) {
+        if (remainingSeconds === 0 && taskTitle && taskId) {
+            // Mark task as complete
+            toggleTaskComplete(taskId, true)
+                .then(() => {
+                    updateTask(taskId, { 
+                        is_completed: true, 
+                        completed_at: new Date().toISOString() 
+                    });
+                })
+                .catch((err) => console.error("Failed to complete task:", err));
+            
+            // Play sound
             const audio = new Audio("/complete.mp3");
             audio.play().catch(() => {
                 if ('Notification' in window && Notification.permission === 'granted') {
@@ -60,7 +70,7 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
 
             });
         }
-    }, [remainingSeconds, taskTitle]);
+    }, [remainingSeconds, taskTitle, taskId, updateTask]);
 
     const formatTime = (sec: number) => {
         const m = String(Math.floor(sec / 60)).padStart(2, "0");
