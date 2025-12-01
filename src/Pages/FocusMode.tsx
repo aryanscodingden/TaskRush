@@ -5,6 +5,8 @@ import GlassButtonSwitch from "@/Components/UI/GlassToggle";
 import TaskPickerModal from "@/Components/FocusTimer/TaskPickerModal";
 import { useTimerStore } from "@/Stores/timer.store";
 import { useTimer } from "@ark-ui/react";
+import { toggleTaskComplete } from "@/Services/tasks.service";
+import { useTasks } from "@/Stores/tasks.store";
 
 type FocusModeProps = {
     onBackToTasks: () => void;
@@ -12,7 +14,9 @@ type FocusModeProps = {
 
 export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     const [pickerOpen, setPickerOpen] = useState(false);
+    const { loadTasks } = useTasks();
     const {
+        taskId,
         taskTitle, 
         expectedMinutes,
         remainingSeconds,
@@ -22,6 +26,7 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
         reset,
         start,
         tick,
+        finish
     } = useTimerStore();
     
     useEffect(() => {
@@ -40,6 +45,22 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
         
         return () => clearInterval(interval);
     }, [isRunning, tick]);
+
+    useEffect(() => {
+        if (remainingSeconds === 0 && taskTitle) {
+            const audio = new Audio("/complete.mp3");
+            audio.play().catch(() => {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Timer Complete!', {
+                        body: `${taskTitle} session finished!`,
+                        icon: '/logo192.png'
+                    });
+                  
+                }
+
+            });
+        }
+    }, [remainingSeconds, taskTitle]);
 
     const formatTime = (sec: number) => {
         const m = String(Math.floor(sec / 60)).padStart(2, "0");
