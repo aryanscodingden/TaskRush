@@ -48,6 +48,14 @@ if (loading) {
 }
 
 if (!session) {
+  if (showLogin) {
+    return <LoginScreen onAuthSuccess={() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setShowLogin(false);
+      });
+    }} />;
+  }
   return <HeroSection onGetStarted={() => setShowLogin(true)} />; 
 }
 

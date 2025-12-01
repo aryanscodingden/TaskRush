@@ -347,9 +347,15 @@ export default function Today({ setMode }: TodayProps) {
                         {!task.is_completed && (
                           <button
                             onClick={() => startTimerForTask(task)}
-                            className="px-3 py-1 text-sm font-medium rounded-md bg-gradient-to-r from-teal-400 to-lime-400 text-black hover:opacity-90 transition"
+                            className="relative group rounded-xl font-bold text-sm bg-gradient-to-b from-zinc-700 to-zinc-800 px-0.5 py-0.5 cursor-pointer overflow-hidden transition"
                           >
-                            Start
+                            <span className="pointer-events-none absolute inset-0 bg-[repeating-conic-gradient(#444_0.0000001%,#555_0.0001%)]" />
+                            <span className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 group-hover:bg-zinc-800 text-zinc-100 transition-colors duration-300 shadow-inner">
+                              Start
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 53 58">
+                                <path strokeWidth="9" stroke="currentColor" d="M44.25 36.3612L17.25 51.9497C11.5833 55.2213 4.5 51.1318 4.50001 44.5885L4.50001 13.4115C4.50001 6.86824 11.5833 2.77868 17.25 6.05033L44.25 21.6388C49.9167 24.9104 49.9167 33.0896 44.25 36.3612Z"/>
+                              </svg>
+                            </span>
                           </button>
                         )}
                       </CardContent>
