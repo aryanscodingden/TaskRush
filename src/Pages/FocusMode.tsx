@@ -3,35 +3,59 @@ import { Play, Pause, RotateCcw, ChevronLeft } from "lucide-react";
 import { GradientBackground } from "@/Components/UI/GradientBackground";
 import GlassButtonSwitch from "@/Components/UI/GlassToggle";
 import TaskPickerModal from "@/Components/FocusTimer/TaskPickerModal";
+import { useTimerStore } from "@/Stores/timer.store";
+import { useTimer } from "@ark-ui/react";
 
 type FocusModeProps = {
     onBackToTasks: () => void;
-    onPickTask: () => void; 
 };
 
-export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) {
-    const [seconds, setSeconds] = useState(25*60);
-    const [isRunning, setIsRunning] = useState(false);
+export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     const [pickerOpen, setPickerOpen] = useState(false);
-
-    useEffect(() => {
-        if (!isRunning) return; 
-        const interval = setInterval(() => {
-            setSeconds((prev) => Math.max(prev - 1, 0));
-        }, 1000)
-        return () => clearInterval(interval);
-    }, [isRunning]);
+    const {
+        taskTitle, 
+        expectedMinutes,
+        remainingSeconds,
+        isRunning,
+        pause,
+        resume, 
+        reset,
+        start,
+        tick,
+    } = useTimerStore();
     
-    const reset = () => {
-        setSeconds(25*60);
-        setIsRunning(false);
-    };
+    useEffect(() => {
+        if (!taskTitle) {
+            setPickerOpen(true);
+        }
+    }, [taskTitle]);
+
+    // Tick the timer every second
+    useEffect(() => {
+        if (!isRunning) return;
+        
+        const interval = setInterval(() => {
+            tick();
+        }, 1000);
+        
+        return () => clearInterval(interval);
+    }, [isRunning, tick]);
 
     const formatTime = (sec: number) => {
         const m = String(Math.floor(sec / 60)).padStart(2, "0");
         const s = String(sec % 60).padStart(2, "0");
         return `${m}:${s}`;
     };
+
+    const spentMinutes =  
+        expectedMinutes * 60 > 0 
+        ? Math.ceil((expectedMinutes * 60 - remainingSeconds) / 60)
+        : 0;
+
+    const progressPercentage = 
+        expectedMinutes > 0 
+        ? (remainingSeconds / (expectedMinutes * 60)) * 100
+        : 0;
 
     return (
         <div className="h-screen w-full bg-zinc-950 text-white p-6 flex flex-col items-center relative overflow-hidden">
@@ -54,14 +78,6 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
                     />
                 </div>
 
-                <button
-                    onClick={onBackToTasks}
-                    className="absolute top-6 left-6 flex items-center gap-2 text-sm opacity-80 hover:opacity-100"
-                >
-                    <ChevronLeft size={18} />
-                    Back
-                </button>
-            
                 <button 
                     onClick={() => setPickerOpen(true)}
                     className="absolute top-6 right-6 px-4 py-2 text-black font-semibold bg-white rounded-xl hover:opacity-90 transition"
@@ -71,13 +87,26 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
             
                 <div className="flex flex-col items-center justify-center h-full gap-6">
                     <div className="text-7xl font-black tabular-nums text-white drop-shadow-xl">
-                        {formatTime(seconds)}
+                        {formatTime(remainingSeconds)}
                     </div>
-                
+                {taskTitle && (
+                    <div className="text-lg font-semibold text-white/80 text-center max-w-xs truncate drop-shadow">
+                        {taskTitle}
+                        </div>
+                )}
+
+                <div className="w-65 h-2 bg-white/20 rounded-full overflow-hidden">
+                <div 
+                    className="h-full bg-green-500 transistion-all duration-700"
+                    style={{width: `${progressPercentage}%`}}
+                    />
+                </div>
+
+        
                     <div className="flex items-center gap-4">
                         {!isRunning ? (
                             <button
-                                onClick={() => setIsRunning(true)}
+                                onClick={resume}
                                 className="px-6 py-3 bg-green-500 rounded-xl flex items-center gap-2 font-semibold text-black"
                             >
                                 <Play size={16} />
@@ -85,7 +114,7 @@ export default function FocusMode({ onBackToTasks, onPickTask}: FocusModeProps) 
                             </button>
                         ) : (
                             <button 
-                                onClick={() => setIsRunning(false)}
+                                onClick={pause}
                                 className="px-6 py-3 bg-red-500 rounded-xl flex items-center gap-2 font-semibold text-black"
                             >
                                 <Pause size={16} />

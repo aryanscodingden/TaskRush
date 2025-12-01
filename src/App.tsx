@@ -6,7 +6,6 @@ import LoginScreen from "./LoginScreen/LoginScreen";
 import FocusMode from './Pages/FocusMode';
 import { motion, AnimatePresence } from "framer-motion";
 
-
 const MainApp = ({ setMode, mode }: { setMode: (mode: "todo" | "focus") => void; mode: "todo" | "focus" }) => {
   return (
     <AnimatePresence mode='wait'>
@@ -21,7 +20,6 @@ const MainApp = ({ setMode, mode }: { setMode: (mode: "todo" | "focus") => void;
         >
           <FocusMode
             onBackToTasks={() => setMode("todo")}
-            onPickTask={() => setMode("todo")}
           />
         </motion.div>
       ) : (
