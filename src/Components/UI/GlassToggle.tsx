@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 const options = ["Todo", "Focus"];
 
@@ -25,15 +26,17 @@ export default function GlassButtonSwitch({
         </button>
       ))}
 
-    <div 
-        className="absolute top-1 bottom-1 w-[calc(50%-4px)] mx-1 rounded-lg bg-white backdrop-blur-md border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-transform duration-300 ease-out"
-        style={{
-            transform: `translateX(${
-                current === "Focus" ? "100%" : "0%"
-            })`,
+    <motion.div 
+        className="absolute top-1 bottom-1 w-[calc(50%-4px)] mx-1 rounded-lg bg-white backdrop-blur-md border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.5)]"
+        animate={{
+            x: current === "Focus" ? "100%" : "0%"
+        }}
+        transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30
         }}
         />
         </div>
   );
 }
-
