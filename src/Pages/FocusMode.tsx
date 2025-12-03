@@ -4,9 +4,10 @@ import { GradientBackground } from "@/Components/UI/GradientBackground";
 import GlassButtonSwitch from "@/Components/UI/GlassToggle";
 import TaskPickerModal from "@/Components/FocusTimer/TaskPickerModal";
 import { useTimerStore } from "@/Stores/timer.store";
-import { useTimer } from "@ark-ui/react";
 import { toggleTaskComplete } from "@/Services/tasks.service";
 import { useTasks } from "@/Stores/tasks.store";
+import { supabase } from "@/Services/supabase";
+import LofiPlayer from "@/Components/FocusTimer/LofiPlayer";
 
 type FocusModeProps = {
   onBackToTasks: () => void;
@@ -28,10 +29,33 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     tick,
     finish,
   } = useTimerStore();
-  const [bgImage, setBgImage] = useState<string | null>(
-    localStorage.getItem("focusBackground")
-  );
-  const [bgPicker, setShowBgPicker] = useState(false);
+  const [bgImage, setBgImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadBg = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const cached = localStorage.getItem("focusBackground");
+        if (cached) setBgImage(cached);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("focus_bg")
+        .eq("id", session.user.id)
+        .single();
+
+      if (data?.focus_bg) {
+        setBgImage(data.focus_bg);
+      } else {
+        const cached = localStorage.getItem("focusBackground");
+        if (cached) setBgImage(cached);
+      }
+    };
+    loadBg();
+  }, []);
+
   useEffect(() => {
     if (!taskTitle) {
       setPickerOpen(true);
@@ -47,12 +71,6 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
 
     return () => clearInterval(interval);
   }, [isRunning, tick]);
-
-  useEffect(() => {
-    if (bgImage) {
-      localStorage.setItem("focusBackground", bgImage);
-    }
-  }, [bgImage]);
 
   useEffect(() => {
     if (remainingSeconds === 0 && taskTitle && taskId) {
@@ -83,17 +101,61 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     return `${m}:${s}`;
   };
 
-  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    setBgImage(url)
-  }
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      // Upload to Supabase
+      const userId = session.user.id;
+      const ext = file.name.split(".").pop();
+      const fileName = `bg-${userId}.${ext}`;
 
-  const resetBackground = () => {
+      const { error: uploadError } = await supabase.storage
+        .from("backgrounds")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) {
+        console.error("Upload Error:", uploadError);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from("backgrounds")
+        .getPublicUrl(fileName);
+
+      const imageUrl = urlData.publicUrl;
+
+      await supabase
+        .from("profiles")
+        .update({ focus_bg: imageUrl })
+        .eq("id", userId);
+
+      setBgImage(imageUrl);
+    } else {
+      // No session, use local storage
+      const url = URL.createObjectURL(file);
+      setBgImage(url);
+      localStorage.setItem("focusBackground", url);
+    }
+  };
+
+  const resetBackground = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      await supabase
+        .from("profiles")
+        .update({ focus_bg: null })
+        .eq("id", session.user.id);
+    }
+    
     setBgImage(null);
-  }
+    localStorage.removeItem("focusBackground");
+  };
+
   const spentMinutes =
     expectedMinutes * 60 > 0
       ? Math.ceil((expectedMinutes * 60 - remainingSeconds) / 60)
@@ -118,6 +180,7 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
       </div>
 
       <div className="relative z-10 w-full h-full flex flex-col items-center">
+        <LofiPlayer />
 
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
     <label className="px-4 py-2 bg-white/20 backdrop-blur-md text-sm text-white rounded-xl cursor-pointer hover:bg-white/30 transition">
