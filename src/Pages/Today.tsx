@@ -21,6 +21,7 @@ import { useTimerStore } from "../Stores/timer.store";
 import { Card, CardContent } from "../Components/UI/card";
 import { supabase } from "@/Services/supabase";
 import GlassButtonSwitch from "@/Components/UI/GlassToggle";
+import FocusStatsPanel from "@/Components/Analytics/FocusStatsPanel";
 
 
 interface TodayProps {
@@ -37,6 +38,7 @@ export default function Today({ onSwitchMode }: TodayProps) {
   const [editTime, setEditTime] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [activeTask, setActiveTask] = useState<any>(null);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const handleSwitch = (mode: string) => {
     if (mode === "Focus") {
@@ -162,7 +164,10 @@ export default function Today({ onSwitchMode }: TodayProps) {
       </div>
 
       <div className="relative z-10 flex-1 overflow-y-auto p-8">
-        <div className="absolute top-6 right-6 z-20">
+        <div className="absolute top-6 right-6 z-20 flex gap-2">
+          <GlassButton size="sm" onClick={() => setStatsOpen(true)}>
+            Analytics
+          </GlassButton>
           <GlassButton size="sm" onClick={handleSignOut}>
             Sign Out
           </GlassButton>
@@ -396,6 +401,11 @@ export default function Today({ onSwitchMode }: TodayProps) {
         open={addTaskModalOpen}
         onClose={() => setAddTaskModalOpen(false)}
       />
+
+      <FocusStatsPanel
+        open={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        />
 
       <AddListModal
         open={addListModalOpen}
