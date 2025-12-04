@@ -335,7 +335,10 @@ export default function Today({ onSwitchMode }: TodayProps) {
                             )}
 
                             <div className="flex items-center gap-3 mt-1">
-                              <div className="text-xs text-zinc-400">
+                              <div 
+                                className="text-xs text-zinc-400"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 {editingTaskId === task.id ? (
                                   <input
                                     className="px-2 py-1 bg-white/20 border border-zinc-300 text-foreground rounded-md w-20 text-center"

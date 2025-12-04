@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTimerStore } from "../../Stores/timer.store";
-import { updateTask } from "../../Services/tasks.service";
+import { updateTask, toggleTaskComplete } from "../../Services/tasks.service";
+import { useTasks } from "../../Stores/tasks.store";
 import { BlurFade } from "../UI/BlurFade";
 import { CheckCircle, X, Play, Pause } from "lucide-react";
 
@@ -13,6 +14,7 @@ function fmtTime(secTotal: number) {
 }
 
 export default function FocusTimer() {
+  const { updateTask: updateLocalTask } = useTasks();
   const {
     taskId,
     taskTitle,
@@ -87,6 +89,21 @@ export default function FocusTimer() {
     }
   }, [finished, taskId, takenMinutes]);
 
+  const handleCompleteAndNext = () => {
+    if (taskId) {
+      // Update local state immediately
+      updateLocalTask(taskId, {
+        is_completed: true,
+        completed_at: new Date().toISOString(),
+      });
+      
+      // Update database
+      toggleTaskComplete(taskId, true).catch(console.error);
+    }
+    
+    reset();
+  };
+
   if (!taskId) return null;
 
   if (finished) {
@@ -160,7 +177,7 @@ export default function FocusTimer() {
 
             <div className="flex gap-3">
               <button
-                onClick={reset}
+                onClick={handleCompleteAndNext}
                 className="flex-1 py-3 rounded-2xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition active:scale-[0.97]"
                 >
                   Start next task

@@ -74,13 +74,16 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
 
   useEffect(() => {
     if (remainingSeconds === 0 && taskTitle && taskId) {
+      console.log("Timer finished, completing task:", taskId);
+      
+      // Update local state immediately for instant UI feedback
+      updateTask(taskId, {
+        is_completed: true,
+        completed_at: new Date().toISOString(),
+      });
+      
+      // Then update database
       toggleTaskComplete(taskId, true)
-        .then(() => {
-          updateTask(taskId, {
-            is_completed: true,
-            completed_at: new Date().toISOString(),
-          });
-        })
         .catch((err) => console.error("Failed to complete task:", err));
 
       const audio = new Audio("/complete.mp3");
@@ -108,7 +111,6 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session) {
-      // Upload to Supabase
       const userId = session.user.id;
       const ext = file.name.split(".").pop();
       const fileName = `bg-${userId}.${ext}`;
@@ -166,6 +168,8 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
 
   return (
     <div className="h-screen w-full bg-zinc-950 text-white p-6 flex flex-col items-center relative overflow-hidden">
+      <LofiPlayer />
+      
       <div className="absolute inset-0 z-0">
         {bgImage ? (
           <img
@@ -180,7 +184,6 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
       </div>
 
       <div className="relative z-10 w-full h-full flex flex-col items-center">
-        <LofiPlayer />
 
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
     <label className="px-4 py-2 bg-white/20 backdrop-blur-md text-sm text-white rounded-xl cursor-pointer hover:bg-white/30 transition">
