@@ -91,7 +91,7 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("Timer Complete!", {
             body: `${taskTitle} session finished!`,
-            icon: "/logo192.png",
+            icon: "/logo.svg",
           });
         }
       });
