@@ -1,46 +1,40 @@
-# Getting Started with Create React App
+# TaskRush  
+focus on what matters
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# why TaskRush?
+Brings all your productivity in a place
+- decide what to focus on 
+- enter deep focus 
+- track time + progress
+- reflect using analytics and imporve!
+- also open source, we love open source
 
-## Available Scripts
+# features you'll love
+- `Smart Task mangement` - Create custom lists, set priorities, set ET of completion & track it! 
+- `Deep focus mode` - Just you, the timer & lofi(if you prefer) against the world (P.S. You can change the background in this mode)
+- `Task Notes` - Small window for you to make sure you dont forget anything while doing the task!
+- `Analytics` - Acess how much time you spent working today, with beautiful analytics
+- `Cloud sync` - Should be okay to access on phones aswell
+- `Clean UI` - Made sure that the UI is clean, non distracting
 
-In the project directory, you can run:
+# under the hood?
+- Frontend - React, Typescript, Zustand, TaildWindCSS
+- Backend + Auth - Supabase (so if the project pauses email me @ aryanscode@gmail.com)
+- Hosting - Vercel 
+- Styling - Glassmorphism + Animated Gradients
 
-### `npm start`
+# screenshots
+- `Analytics`
+![Analytics](https://github.com/aryanscodingden/TaskRush/blob/main/public/screens/analytics.png)
+- `Deep Focus Mode`
+![Focus Mode](https://github.com/aryanscodingden/TaskRush/blob/main/public/screens/focusmode.png)
+- `To do list w/ timer`
+![Todo list](https://github.com/aryanscodingden/TaskRush/blob/main/public/screens/todolist.png)
+- `Note taking built in!`
+![Note Taking](https://github.com/aryanscodingden/TaskRush/blob/main/public/screens/mininotes.png)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+# ❤️ Built With Intent
+TaskRush started as a personal tool to fight procrastination, and transformed into a product to help anyone get into deep work faster
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Contribute
+if you want to contribute just raise a pull request, or mail me @ aryanscode@gmail.com, & `i'll respond asap`
