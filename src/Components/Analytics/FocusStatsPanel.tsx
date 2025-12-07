@@ -35,13 +35,6 @@ export default function FocusStatsPanel({ open, onClose }: Props) {
   const loadStats = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("No user logged in");
-        setLoading(false);
-        return;
-      }
-
       const from = new Date();
       from.setDate(from.getDate() - 13);
       const fromISO = from.toISOString().split("T")[0];
@@ -49,43 +42,14 @@ export default function FocusStatsPanel({ open, onClose }: Props) {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .eq("user_id", user.id)
         .gte("created_at", fromISO);
 
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
-
-      console.log("Loaded tasks for analytics:", data);
+      if (error) throw error;
 
       const tasks = (data || []) as Task[];
 
-      console.log("Processing tasks:", tasks);
-
-      // Create entries for all 14 days
       const byDate: Record<string, DayStat> = {};
-      
-      // Initialize all 14 days first
-      for (let i = 0; i < 14; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() - (13 - i));
-        const key = date.toISOString().split("T")[0];
-        const label = date.toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-        });
-        byDate[key] = {
-          dateKey: key,
-          label,
-          totalEstimated: 0,
-          totalActual: 0,
-          focusPercent: 0,
-          tasksCompleted: 0,
-        };
-      }
 
-      // Add task data to corresponding days
       for (const t of tasks) {
         const key = (t.completed_at || t.created_at).slice(0, 10);
         if (!byDate[key]) {
@@ -127,8 +91,6 @@ export default function FocusStatsPanel({ open, onClose }: Props) {
         rows.length > 0
           ? rows.reduce((s, r) => s + r.focusPercent, 0) / rows.length
           : 0;
-
-      console.log("Calculated stats:", { rows, totalActual, tasksCompleted, avgFocus });
 
       setStats(rows);
       setSummary({

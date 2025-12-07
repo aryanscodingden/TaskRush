@@ -41,10 +41,6 @@ export default function HeroSection({onGetStarted}: HeroSectionProps) {
               Get Started Free
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-
-            <div className="text-sm text-slate-400">
-              No credit card required
-            </div>
           </div>
         </div>
 

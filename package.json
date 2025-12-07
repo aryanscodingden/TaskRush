@@ -29,8 +29,8 @@
     "zustand": "^5.0.8"
   },
   "scripts": {
-    "start": "cross-env NODE_OPTIONS=--no-webstorage craco start",
-    "build": "cross-env NODE_OPTIONS=--no-webstorage craco build",
+    "start": "craco start",
+    "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
