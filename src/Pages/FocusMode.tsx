@@ -105,57 +105,80 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
   };
 
   const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("🖼️ Background upload triggered");
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    const { data: { session } } = await supabase.auth.getSession();
     
-    if (session) {
-      const userId = session.user.id;
-      const ext = file.name.split(".").pop();
-      const fileName = `bg-${userId}.${ext}`;
+    if (!file) {
+      console.log("❌ No file selected");
+      return;
+    }
 
-      const { error: uploadError } = await supabase.storage
-        .from("backgrounds")
-        .upload(fileName, file, { upsert: true });
+    console.log("📁 File selected:", file.name, file.type, file.size);
 
-      if (uploadError) {
-        console.error("Upload Error:", uploadError);
-        return;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from("backgrounds")
-        .getPublicUrl(fileName);
-
-      const imageUrl = urlData.publicUrl;
-
-      await supabase
-        .from("profiles")
-        .update({ focus_bg: imageUrl })
-        .eq("id", userId);
-
-      setBgImage(imageUrl);
-    } else {
-      // No session, use local storage
-      const url = URL.createObjectURL(file);
-      setBgImage(url);
-      localStorage.setItem("focusBackground", url);
+    try {
+      // Convert image to base64 and store locally
+      const reader = new FileReader();
+      
+      reader.onload = async (event) => {
+        const imageUrl = event.target?.result as string;
+        console.log("✅ Image converted to base64");
+        
+        // Store in localStorage
+        localStorage.setItem("focusBackground", imageUrl);
+        setBgImage(imageUrl);
+        console.log("🎉 Background saved successfully");
+        
+        // Also try to save to Supabase if logged in (optional, won't fail if it doesn't work)
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            console.log("💾 Attempting to save to profile...");
+            await supabase
+              .from("profiles")
+              .update({ focus_bg: imageUrl })
+              .eq("id", session.user.id);
+            console.log("✅ Saved to profile");
+          }
+        } catch (err) {
+          console.log("⚠️ Could not save to profile (this is ok):", err);
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error("❌ Error reading file:", error);
+        alert("Failed to read the image file");
+      };
+      
+      reader.readAsDataURL(file);
+      
+    } catch (err) {
+      console.error("❌ Unexpected error:", err);
+      alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
   const resetBackground = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    console.log("🗑️ Resetting background");
     
-    if (session) {
-      await supabase
-        .from("profiles")
-        .update({ focus_bg: null })
-        .eq("id", session.user.id);
+    // Clear localStorage
+    localStorage.removeItem("focusBackground");
+    setBgImage(null);
+    
+    // Try to clear from profile if logged in
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase
+          .from("profiles")
+          .update({ focus_bg: null })
+          .eq("id", session.user.id);
+        console.log("✅ Background cleared from profile");
+      }
+    } catch (err) {
+      console.log("⚠️ Could not clear from profile (this is ok):", err);
     }
     
-    setBgImage(null);
-    localStorage.removeItem("focusBackground");
+    console.log("🎉 Background reset complete");
   };
 
   const spentMinutes =
@@ -186,20 +209,27 @@ export default function FocusMode({ onBackToTasks }: FocusModeProps) {
       <div className="relative z-10 w-full h-full flex flex-col items-center">
 
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
-    <label className="px-4 py-2 bg-white/20 backdrop-blur-md text-sm text-white rounded-xl cursor-pointer hover:bg-white/30 transition">
+    <label 
+        className="px-4 py-2 bg-white/20 backdrop-blur-md text-sm text-white rounded-xl cursor-pointer hover:bg-white/30 transition border border-white/20"
+        onClick={() => console.log("🖱️ Label clicked")}
+    >
         Change Background
         <input 
             type="file"
             accept="image/*"
             className="hidden"
             onChange={handleBackgroundUpload}
+            onClick={(e) => {
+                console.log("📂 File input clicked");
+                e.stopPropagation();
+            }}
             />
     </label>
 
     {bgImage && (
         <button
             onClick={resetBackground}
-            className="px-4 py-2 bg-red-500/80 backdrop-blur-md text-sm rounded-xl hover:bg-red-500 transition"
+            className="px-4 py-2 bg-red-500/80 backdrop-blur-md text-sm text-white rounded-xl hover:bg-red-500 transition border border-red-600/50"
             >
                 Reset
             </button>

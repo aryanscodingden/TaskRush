@@ -68,7 +68,6 @@ export default function AddTaskModal({open, onClose}: AddTaskModalProps) {
         
         setError("");
         
-        // Check if user has any lists first
         if (lists.length === 0) {
             console.log("Validation failed: No lists exist");
             setError("Please create a list first before adding tasks");
