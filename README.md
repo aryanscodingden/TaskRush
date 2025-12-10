@@ -33,6 +33,25 @@ Brings all your productivity in a place
 - `Note taking built in!`
 ![Note Taking](https://github.com/aryanscodingden/TaskRush/blob/main/public/screens/mininotes.png)
 
+# run it locally
+git clone `https://github.com/aryanscodingden/TaskRush/`
+<br>
+cd taskrush
+<br>
+npm install
+<br>
+create a .env file in the root named `.env.local`, put the following under the file:
+<br>
+REACT_APP_SUPABASE_URL=your_supabase_project_url
+<br>
+REACT_APP_SUPABASE_ANON_KEY=your_public_anon_key
+<br>
+In Supabase → Authentication → URL Configuration
+<br>
+http://localhost:3000
+
+
+
 # ❤️ Built With Intent
 TaskRush started as a personal tool to fight procrastination, and transformed into a product to help anyone get into deep work faster
 
