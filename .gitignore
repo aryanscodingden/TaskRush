@@ -9,6 +9,8 @@ yarn-debug.log*
 yarn-error.log*
 .vscode
 .env.example
+env.example
+env.local
 .env.local
 .react-app-env.d.ts
 reportWebVitals.ts
